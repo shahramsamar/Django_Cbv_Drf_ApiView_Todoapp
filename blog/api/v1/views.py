@@ -6,43 +6,27 @@ from blog.api.v1.serializer import PostSerializer
 from ...models import Post
 from rest_framework import status
 from django.shortcuts import get_object_or_404
- 
+from rest_framework.views import APIView
 
 
-@api_view(['GET','POST'])
-@permission_classes([IsAuthenticatedOrReadOnly])
-def post_list(request):
-    # Handle GET request
-    if request.method == 'GET':
-        # Retrieve all active posts
-        posts = Post.objects.filter(status=True)
-        # Serialize the queryset of posts
-        serializer = PostSerializer(posts, many=True)
-        # Return serialized data as response
-        return Response(serializer.data)
+class PostList(APIView):
+#     """ getting a list of post and creating new posts"""
+    permission_classes =[IsAuthenticatedOrReadOnly]
+    serializer_class = PostSerializer
     
-    # Handle POST request
-    elif request.method == 'POST':
-        # return Response("ok")
-        # return Response(request.data)
-
-        # Create a serializer instance with the request data
-        serializer = PostSerializer(data=request.data)
-        # Validate the serializer data
-        if serializer.is_valid(raise_exception=True):
-        # Save the new post
-            serializer.save()
-        # Return the serialized data of the new post
+    """ retrieving a list of posts"""
+    def get(self,request):
+            post = Post.objects.filter(status=True)
+            serializer = PostSerializer(post,many=True)
             return Response(serializer.data)
-
-        # if serializer.is_valid():
-        # #     # Save the new post
-        #     serializer.save()
-        # #     # Return the serialized data of the new post
-        #     return Response(serializer.data)
-        # else:
-        #     # Return serializer errors if data is invalid
-        #     return Response(serializer.errors)
+        
+    """creating a post with provided data"""
+    def post(self,request):
+        serializer = PostSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+           
 
 
 
