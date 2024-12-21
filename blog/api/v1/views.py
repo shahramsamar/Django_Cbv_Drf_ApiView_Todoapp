@@ -29,49 +29,25 @@ class PostList(APIView):
            
 
 
-
-@api_view(['GET','PUT','DELETE'])
-@permission_classes([IsAuthenticatedOrReadOnly])
-def post_detail(request, id):
-   
-    # try:
-    #     post = Post.objects.get(pk=id)
-    #     # print(post.__dict__)
-    #     serializer = PostSerializer(post)
-    #     # print(serializer.__dict__)
-    #     return Response(serializer.data)
-    # except Post.DoesNotExist:
-    #     # return Response({'detail':'post dose not exist'},status=404)
-    #     return Response({'detail':'post dose not exist'},status=status.HTTP_404_NOT_FOUND)
-
-    # Get the post object or return a 404 error if not found
-    post = get_object_or_404(Post, pk=id, 
-                                        status=True)
-
-    # Handle GET request
-    if request.method == 'GET':
-
-        # Serialize the post object
-        serializer = PostSerializer(post)
-        
-        # Return the serialized data as a response
+class PostDetail(APIView):
+    """ getting detail of the post and edit plus removing it"""
+    permission_classes =[IsAuthenticated]
+    serializer_class = PostSerializer
+    
+    """retrieving the post data"""
+    def get(self,request,id):
+        post =  get_object_or_404(Post, pk=id, status=True)
+        serializer = self.serializer_class(post)
         return Response(serializer.data)
-
-        # Handle PUT request
-    elif request.method == 'PUT':
-        # Create a serializer instance with the request data
-        serializer = PostSerializer(post,
-         data=request.data)
-        # Validate the serializer data
-        if serializer.is_valid(raise_exception=True):
-        # Save the new post
-            serializer.save()
-        #  Return the serialized data of the new post
+    """editing the post data"""
+    def put(self,request,id):
+        post =  get_object_or_404(Post, pk=id, status=True)
+        serializer = self.serializer_class(post)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data)
-
-     # Handle DELETE request
-    elif request.method == 'DELETE':  
-        post.delete()  
-        #  Return the serialized data of the new post
-        return Response({'detail':'item removed successfully'}, 
-                                     status=status.HTTP_204_NO_CONTENT)
+    """ deleting the post object """
+    def delete(self,request,id):
+        post = get_object_or_404(Post, pk=id, status=True)
+        post.delete()
+        return Response({"detail":"Item removed successfully"},status=status.HTTP_204_NO_CONTENT)
